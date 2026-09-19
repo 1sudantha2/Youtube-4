@@ -1,0 +1,36 @@
+# YT4 baseline profile (seed).
+#
+# This file seeds ART ahead-of-time compilation hints for the critical startup
+# path so first-frame latency and scroll jank are minimized even before a
+# Play-delivered cloud profile arrives (profileinstaller picks this up on
+# sideloaded installs).
+#
+# Regenerate the real thing from measured traces with a :baselineprofile module
+# (androidx.benchmark:benchmark-macro-junit4 + BaselineProfileRule). The rules
+# below cover the hot paths we know matter: app init, DI, home feed inflation,
+# Compose measure/layout/draw and ExoPlayer prepare.
+
+# App startup + service locator
+HSPLcom/yt4/app/YT4App;->onCreate()V
+HSPLcom/yt4/app/core/di/ServiceLocator;->**(**)**
+HSPLcom/yt4/app/core/network/HttpClientFactory;->**(**)**
+
+# Home feed first frame
+HSPLcom/yt4/app/ui/home/HomeScreenKt;->**(**)**
+HSPLcom/yt4/app/ui/home/HomeViewModel;->**(**)**
+HSPLcom/yt4/app/ui/components/VideoCardKt;->**(**)**
+HSPLcom/yt4/app/ui/components/ShimmerKt;->**(**)**
+HSPLcom/yt4/app/data/repo/FeedRepository;->**(**)**
+HSPLcom/yt4/app/core/innertube/InnerTubeApi;->**(**)**
+
+# Composition / layout hot path
+HSPLandroidx/compose/runtime/**->**(**)**
+HSPLandroidx/compose/ui/**->**(**)**
+Landroidx/compose/ui/node/LayoutNode;**
+Landroidx/compose/runtime/ComposerImpl;**
+
+# Player prepare path
+HSPLcom/yt4/app/player/PlayerFactory;->**(**)**
+HSPLcom/yt4/app/player/LowRamLoadControl;->**(**)**
+HSPLandroidx/media3/exoplayer/ExoPlayerImpl;->**(**)**
+HSPLandroidx/media3/exoplayer/ExoPlayerImplInternal;->**(**)**

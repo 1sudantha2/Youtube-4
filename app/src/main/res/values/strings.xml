@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">YT4</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_subscriptions">Subs</string>
+    <string name="nav_library">Library</string>
+    <string name="nav_account">Account</string>
+    <string name="sign_in_hint">Sign in with your Google account. Cookies are captured locally on this device only.</string>
+    <string name="quality_auto">Auto</string>
+    <string name="comments">Comments</string>
+</resources>

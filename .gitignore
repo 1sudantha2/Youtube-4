@@ -1,0 +1,28 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.kotlin/
+captures/
+
+# Local config
+local.properties
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+output-metadata.json
+
+# Compose stability reports (generated via -PcomposeMetrics)
+compose-metrics/
+compose-reports/
+
+# OS junk
+.DS_Store
+Thumbs.db
