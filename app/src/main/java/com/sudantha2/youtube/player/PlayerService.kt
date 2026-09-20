@@ -42,10 +42,51 @@ class PlayerService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
 
+    /**
+     * Session callback handling the PLAY_SOURCES custom command. Custom
+     * commands live on the session callback, not on MediaSessionService.
+     */
+    private val sessionCallback = object : MediaSession.Callback {
+
+        override fun onCustomCommand(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            customCommand: SessionCommand,
+            args: Bundle,
+        ): ListenableFuture<SessionResult> {
+            val result = SettableFuture.create<SessionResult>()
+            if (customCommand.customAction != PlayerCommands.CMD_PLAY_SOURCES) {
+                result.set(SessionResult(SessionResult.RESULT_ERROR_NOT_SUPPORTED))
+                return result
+            }
+
+            val videoUrl = args.getString(PlayerCommands.ARG_VIDEO_URL)
+            val audioUrl = args.getString(PlayerCommands.ARG_AUDIO_URL)
+            val startMs = args.getLong(PlayerCommands.ARG_START_POSITION_MS, C.TIME_UNSET)
+
+            val source = buildSource(videoUrl, audioUrl)
+            if (source == null) {
+                result.set(SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE))
+                return result
+            }
+
+            val player = session.player as ExoPlayer
+            if (startMs == C.TIME_UNSET) {
+                player.setMediaSource(source)
+            } else {
+                player.setMediaSource(source, startMs)
+            }
+            player.prepare()
+            player.playWhenReady = true
+            result.set(SessionResult(SessionResult.RESULT_SUCCESS))
+            return result
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         val player = PlayerFactory.create(this, ServiceLocator.httpClient)
-        mediaSession = MediaSession.Builder(this, player)
+        mediaSession = MediaSession.Builder(this, player, sessionCallback)
             .setSessionActivity(
                 PendingIntent.getActivity(
                     this,
@@ -59,35 +100,6 @@ class PlayerService : MediaSessionService() {
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
         mediaSession
-
-    override fun onCustomCommand(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo,
-        customCommand: SessionCommand,
-        args: Bundle,
-    ): ListenableFuture<SessionResult> {
-        if (customCommand.customAction == PlayerCommands.CMD_PLAY_SOURCES) {
-            val videoUrl = args.getString(PlayerCommands.ARG_VIDEO_URL)
-            val audioUrl = args.getString(PlayerCommands.ARG_AUDIO_URL)
-            val startMs = args.getLong(PlayerCommands.ARG_START_POSITION_MS, C.TIME_UNSET)
-
-            val source = buildSource(videoUrl, audioUrl)
-            if (source != null) {
-                val player = session.player as ExoPlayer
-                if (startMs == C.TIME_UNSET) {
-                    player.setMediaSource(source)
-                } else {
-                    player.setMediaSource(source, startMs)
-                }
-                player.prepare()
-                player.playWhenReady = true
-                val result = SettableFuture.create<SessionResult>()
-                result.set(SessionResult(SessionResult.RESULT_SUCCESS))
-                return result
-            }
-        }
-        return super.onCustomCommand(session, controller, customCommand, args)
-    }
 
     /** video+audio merge, single progressive file, or audio-only. */
     private fun buildSource(videoUrl: String?, audioUrl: String?): MediaSource? {
