@@ -5,8 +5,13 @@ on:
     branches: ["**"]
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
+# Skip the loop created when this workflow itself pushes the APK branch.
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, 'apk-bot')
     name: Build You-tube.apk
     runs-on: ubuntu-latest
     steps:
@@ -55,12 +60,6 @@ jobs:
           DETAILS="${DETAILS//$'\n'/'%0A'}"
           DETAILS="${DETAILS//$'\r'/'%0D'}"
           echo "::error title=Gradle build failed::$DETAILS"
-          {
-            echo "## Gradle failure details"
-            echo '```'
-            echo "$DETAILS"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload build log
         if: failure()
@@ -71,10 +70,34 @@ jobs:
           retention-days: 7
 
       - name: Upload APK artifact
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: You-tube-apk
           path: app/build/outputs/apk/release/You-tube.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish APK to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: You-tube v1.0.0
+          body: |
+            CI-built release APK (R8 full mode, signed with a throwaway CI
+            keystore — fine for sideloading/testing).
+          files: app/build/outputs/apk/release/You-tube.apk
+          make_latest: true
+
+      # Pushes the APK to a dedicated branch so it can be fetched with
+      # plain git (artifact storage hosts may be unreachable from some
+      # networks). The apk-bot marker prevents a workflow re-run loop.
+      - name: Commit APK to release-artifacts branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B release-artifacts
+          mkdir -p dist
+          cp app/build/outputs/apk/release/You-tube.apk dist/You-tube.apk
+          git add -f dist/You-tube.apk
+          git commit -m "chore: publish You-tube.apk (apk-bot)"
+          git push -f origin release-artifacts
