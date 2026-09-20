@@ -16,6 +16,9 @@ import org.schabi.newpipe.extractor.stream.StreamInfo
  * Runs on [Dispatchers.IO] — NPE is blocking, parses HTML/JS and must never
  * touch the main thread. Results are mapped into immutable option lists the
  * player can consume directly.
+ *
+ * NPE naming map (v0.24.x): `videoStreams` = muxed progressive,
+ * `videoOnlyStreams` = DASH video-only, `audioStreams` = audio-only.
  */
 class PlayerRepository {
 
@@ -35,14 +38,15 @@ class PlayerRepository {
                     url = s.content,
                     height = height,
                     label = s.resolution ?: "${height}p",
-                    bitrate = s.averageBitrate,
+                    bitrate = s.bitrate, // VideoStream exposes itag bitrate
                     isMuxed = false,
                 )
             }
             .sortedByDescending { it.height }
             .toList()
 
-        val muxed = info.muxedStreams
+        // NPE's `videoStreams` are the muxed progressive formats (≤720p).
+        val muxed = info.videoStreams
             .asSequence()
             .filter { it.content.isNotBlank() && it.format === MediaFormat.MPEG_4 }
             .mapNotNull { s ->
@@ -51,7 +55,7 @@ class PlayerRepository {
                     url = s.content,
                     height = height,
                     label = s.resolution ?: "${height}p",
-                    bitrate = s.averageBitrate,
+                    bitrate = s.bitrate,
                     isMuxed = true,
                 )
             }

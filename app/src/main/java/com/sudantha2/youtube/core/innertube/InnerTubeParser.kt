@@ -52,7 +52,7 @@ object InnerTubeParser {
                         if (renderer != null) parseVideoRenderer(renderer)?.let(items::add)
                     }
                     o.obj("videoRenderer") != null ->
-                        parseVideoRenderer(o.obj("videoRenderer"))?.let(items::add)
+                        o.obj("videoRenderer")?.let { parseVideoRenderer(it) }?.let(items::add)
                     o.obj("itemSectionRenderer") != null -> {
                         o.obj("itemSectionRenderer")?.arr("contents")?.forEach { sec ->
                             val renderer = sec.asObj()?.firstKnownVideoRenderer()

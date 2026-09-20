@@ -19,7 +19,7 @@ import androidx.media3.exoplayer.DefaultLoadControl
  *  └──────────────────────────────────┴────────────┘
  *
  * Additionally:
- *  • prioritizeTimeOverBandwidth = true — implements C.PRIORITY_PLAYBACK:
+ *  • prioritizeTimeOverSizeThresholds = true — implements C.PRIORITY_PLAYBACK:
  *    when the byte budget is tight, ExoPlayer prefers keeping playback
  *    moving over hoarding bytes.
  *  • 3 s back-buffer, not retained from keyframes — seeking backwards never
@@ -51,7 +51,7 @@ object LowRamLoadControl {
                 BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
             )
             .setTargetBufferBytes(TARGET_BUFFER_BYTES)
-            .setPrioritizeTimeOverBandwidth(true) // C.PRIORITY_PLAYBACK
+            .setPrioritizeTimeOverSizeThresholds(true) // C.PRIORITY_PLAYBACK policy
             .setBackBuffer(BACK_BUFFER_MS, /* retainBackBufferFromKeyframe = */ false)
             .build()
 }

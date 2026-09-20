@@ -41,15 +41,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.source.MediaSource
-import androidx.media3.exoplayer.source.MergingMediaSource
+import androidx.media3.common.C
 import androidx.media3.session.MediaController
 import com.sudantha2.youtube.core.di.ServiceLocator
 import com.sudantha2.youtube.player.AdaptiveFallback
 import com.sudantha2.youtube.player.BackgroundAudioManager
 import com.sudantha2.youtube.player.PlaybackRegistry
-import com.sudantha2.youtube.player.PlayerFactory
+import com.sudantha2.youtube.player.PlayerCommands
 import com.sudantha2.youtube.player.compose.PlayerSurface
 import com.sudantha2.youtube.ui.common.vmFactory
 
@@ -86,19 +84,19 @@ fun PlayerScreen(
     }
 
     // Apply source: first load keeps TIME_UNSET, quality switches keep position.
+    // The merged MediaSource is assembled in the service (PlayerService) — the
+    // MediaController interface only carries this command + args.
     var hasAppliedOnce by remember(videoId) { mutableStateOf(false) }
     LaunchedEffect(controller, resolved) {
         val c = controller ?: return@LaunchedEffect
         val r = resolved ?: return@LaunchedEffect
 
-        val source = buildMediaSource(r)
-        if (hasAppliedOnce) {
-            c.setMediaSource(source, c.currentPosition)
-        } else {
-            c.setMediaSource(source)
-        }
-        c.prepare()
-        c.playWhenReady = true
+        PlayerCommands.playSources(
+            controller = c,
+            videoUrl = r.videoUrl,
+            audioUrl = r.audioUrl,
+            startPositionMs = if (hasAppliedOnce) c.currentPosition else C.TIME_UNSET,
+        )
         hasAppliedOnce = true
 
         vm.reportApplied(r)
@@ -157,7 +155,7 @@ fun PlayerScreen(
 
         // ── Controls & metadata ───────────────────────────────────────────
         if (bundle != null) {
-            PlaybackControls(controller = controller, modifier = Modifier.padding(horizontal = 8.dp))
+            PlaybackControls(player = controller, modifier = Modifier.padding(horizontal = 8.dp))
 
             Text(
                 text = bundle.title,
@@ -243,13 +241,4 @@ fun PlayerScreen(
             }
         }
     }
-}
-
-/** Builds the (possibly merged) MediaSource for a resolved pair. */
-private fun buildMediaSource(source: ResolvedSource): MediaSource {
-    val factory = PlayerFactory.mediaSourceFactory(ServiceLocator.httpClient)
-    val video = factory.createMediaSource(MediaItem.fromUri(source.videoUrl))
-    val audioUrl = source.audioUrl ?: return video
-    // DASH video-only + Opus/AAC audio-only, synced by the renderer clock.
-    return MergingMediaSource(video, factory.createMediaSource(MediaItem.fromUri(audioUrl)))
 }

@@ -1,10 +1,23 @@
 package com.sudantha2.youtube.player
 
+import android.app.PendingIntent
 import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.OptIn
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.SettableFuture
+import com.sudantha2.youtube.MainActivity
 import com.sudantha2.youtube.core.di.ServiceLocator
 
 /**
@@ -18,6 +31,11 @@ import com.sudantha2.youtube.core.di.ServiceLocator
  *    churn between screens).
  *  • Screen-off audio continues as a proper foreground service with the
  *    platform media notification, at minimal CPU (no UI thread work).
+ *
+ * The UI cannot build MergingMediaSources through the MediaController
+ * interface (Player only takes MediaItems), so it sends the raw stream URLs
+ * via the [PlayerCommands.CMD_PLAY_SOURCES] custom command and this service
+ * assembles the source on the real [ExoPlayer].
  */
 @OptIn(UnstableApi::class)
 class PlayerService : MediaSessionService() {
@@ -29,11 +47,11 @@ class PlayerService : MediaSessionService() {
         val player = PlayerFactory.create(this, ServiceLocator.httpClient)
         mediaSession = MediaSession.Builder(this, player)
             .setSessionActivity(
-                android.app.PendingIntent.getActivity(
+                PendingIntent.getActivity(
                     this,
                     0,
-                    Intent(this, com.sudantha2.youtube.MainActivity::class.java),
-                    android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT,
+                    Intent(this, MainActivity::class.java),
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 ),
             )
             .build()
@@ -42,11 +60,54 @@ class PlayerService : MediaSessionService() {
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
         mediaSession
 
+    override fun onCustomCommand(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        customCommand: SessionCommand,
+        args: Bundle,
+    ): ListenableFuture<SessionResult> {
+        if (customCommand.customAction == PlayerCommands.CMD_PLAY_SOURCES) {
+            val videoUrl = args.getString(PlayerCommands.ARG_VIDEO_URL)
+            val audioUrl = args.getString(PlayerCommands.ARG_AUDIO_URL)
+            val startMs = args.getLong(PlayerCommands.ARG_START_POSITION_MS, C.TIME_UNSET)
+
+            val source = buildSource(videoUrl, audioUrl)
+            if (source != null) {
+                val player = session.player as ExoPlayer
+                if (startMs == C.TIME_UNSET) {
+                    player.setMediaSource(source)
+                } else {
+                    player.setMediaSource(source, startMs)
+                }
+                player.prepare()
+                player.playWhenReady = true
+                val result = SettableFuture.create<SessionResult>()
+                result.set(SessionResult(SessionResult.RESULT_SUCCESS))
+                return result
+            }
+        }
+        return super.onCustomCommand(session, controller, customCommand, args)
+    }
+
+    /** video+audio merge, single progressive file, or audio-only. */
+    private fun buildSource(videoUrl: String?, audioUrl: String?): MediaSource? {
+        val factory = PlayerFactory.mediaSourceFactory(ServiceLocator.httpClient)
+        return when {
+            videoUrl != null && audioUrl != null -> MergingMediaSource(
+                factory.createMediaSource(MediaItem.fromUri(videoUrl)),
+                factory.createMediaSource(MediaItem.fromUri(audioUrl)),
+            )
+            videoUrl != null -> factory.createMediaSource(MediaItem.fromUri(videoUrl))
+            audioUrl != null -> factory.createMediaSource(MediaItem.fromUri(audioUrl))
+            else -> null
+        }
+    }
+
     override fun onTaskRemoved(rootIntent: Intent?) {
         val player = mediaSession?.player
         // App swiped away while not playing → tear down now and release the
         // decoders. Active playback keeps the foreground service alive.
-        if (player == null || !player.playWhenReady || player.playbackState == androidx.media3.common.Player.STATE_ENDED) {
+        if (player == null || !player.playWhenReady || player.playbackState == Player.STATE_ENDED) {
             stopSelf()
         }
     }
