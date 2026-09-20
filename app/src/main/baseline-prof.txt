@@ -26,8 +26,8 @@ HSPLcom/sudantha2/youtube/core/innertube/InnerTubeApi;->**(**)**
 # Composition / layout hot path
 HSPLandroidx/compose/runtime/**->**(**)**
 HSPLandroidx/compose/ui/**->**(**)**
-Landroidx/compose/ui/node/LayoutNode;**
-Landroidx/compose/runtime/ComposerImpl;**
+HSPLandroidx/compose/ui/node/LayoutNode;->**(**)**
+HSPLandroidx/compose/runtime/ComposerImpl;->**(**)**
 
 # Player prepare path
 HSPLcom/sudantha2/youtube/player/PlayerFactory;->**(**)**
