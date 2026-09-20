@@ -24,13 +24,23 @@ android {
         resourceConfigurations += setOf("en")
     }
 
-    // CI/local convenience signing: reuses the auto-generated debug keystore
-    // so produced APKs are installable. For Play distribution, point this at
-    // a real upload keystore supplied via gradle.properties / env secrets.
+    // CI/local convenience signing so produced APKs are installable.
+    // CI generates `ci.keystore` at the repo root (see .github/workflows);
+    // local builds fall back to the auto-generated debug keystore.
+    // For Play distribution, point this at a real upload keystore supplied
+    // via gradle.properties / env secrets instead.
     signingConfigs {
-        val debugKeystore = getByName("debug") // container scope — resolve here
+        val debugSigning = getByName("debug") // container scope — resolve here
         create("ci") {
-            initWith(debugKeystore)
+            val ciKeystore = rootProject.file("ci.keystore")
+            if (ciKeystore.exists()) {
+                storeFile = ciKeystore
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            } else {
+                initWith(debugSigning)
+            }
         }
     }
 

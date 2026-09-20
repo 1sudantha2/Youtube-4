@@ -11,6 +11,7 @@ captures/
 
 # Local config
 local.properties
+ci.keystore
 
 # Build outputs
 *.apk

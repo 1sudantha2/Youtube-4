@@ -25,6 +25,16 @@ jobs:
         with:
           gradle-version: "8.9"
 
+      # Self-generated throwaway keystore so the APK installs on devices.
+      - name: Create CI signing keystore
+        run: |
+          keytool -genkeypair \
+            -keystore ci.keystore \
+            -storepass android -keypass android \
+            -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
       - name: Build release APK (R8 full mode, CI-signed)
         run: |
           set -o pipefail
