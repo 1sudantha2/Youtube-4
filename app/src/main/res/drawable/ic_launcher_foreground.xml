@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    YouTube logo as a pure vector: red rounded card + white play triangle.
+    Drawn on the 108dp adaptive-icon grid, centered in the safe zone.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Rounded play glyph -->
+
+    <!-- Red rounded card: 60×36 centered on (54,54), corner radius 9 -->
     <path
-        android:fillColor="#FFFF0033"
-        android:pathData="M34,32 L78,54 L34,76 Z" />
+        android:fillColor="#FFFF0000"
+        android:pathData="M33,36 h42 a9,9 0 0 1 9,9 v18 a9,9 0 0 1 -9,9 h-42 a9,9 0 0 1 -9,-9 v-18 a9,9 0 0 1 9,-9 z" />
+
+    <!-- White play triangle -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M47,44 L67,54 L47,64 z" />
 </vector>

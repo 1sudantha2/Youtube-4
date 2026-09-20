@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">YT4</string>
+    <string name="app_name">You-tube</string>
     <string name="nav_home">Home</string>
     <string name="nav_subscriptions">Subs</string>
     <string name="nav_library">Library</string>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#0F0F0F</color>
-    <color name="yt_red">#FFFF0033</color>
+    <!-- Adaptive icon background: classic YouTube white tile. -->
+    <color name="ic_launcher_background">#FFFFFFFF</color>
+    <color name="yt_red">#FFFF0000</color>
 </resources>

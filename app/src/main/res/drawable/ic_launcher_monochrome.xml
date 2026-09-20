@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Monochrome (themed-icons) variant: a single filled shape with the play
+    triangle punched out via even-odd fill, so launchers can tint it freely.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#FF000000"
+        android:fillType="evenOdd"
+        android:pathData="M33,36 h42 a9,9 0 0 1 9,9 v18 a9,9 0 0 1 -9,9 h-42 a9,9 0 0 1 -9,-9 v-18 a9,9 0 0 1 9,-9 z M47,44 L67,54 L47,64 z" />
+</vector>

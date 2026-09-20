@@ -11,17 +11,17 @@
 # Compose measure/layout/draw and ExoPlayer prepare.
 
 # App startup + service locator
-HSPLcom/yt4/app/YT4App;->onCreate()V
-HSPLcom/yt4/app/core/di/ServiceLocator;->**(**)**
-HSPLcom/yt4/app/core/network/HttpClientFactory;->**(**)**
+HSPLcom/sudantha2/youtube/YT4App;->onCreate()V
+HSPLcom/sudantha2/youtube/core/di/ServiceLocator;->**(**)**
+HSPLcom/sudantha2/youtube/core/network/HttpClientFactory;->**(**)**
 
 # Home feed first frame
-HSPLcom/yt4/app/ui/home/HomeScreenKt;->**(**)**
-HSPLcom/yt4/app/ui/home/HomeViewModel;->**(**)**
-HSPLcom/yt4/app/ui/components/VideoCardKt;->**(**)**
-HSPLcom/yt4/app/ui/components/ShimmerKt;->**(**)**
-HSPLcom/yt4/app/data/repo/FeedRepository;->**(**)**
-HSPLcom/yt4/app/core/innertube/InnerTubeApi;->**(**)**
+HSPLcom/sudantha2/youtube/ui/home/HomeScreenKt;->**(**)**
+HSPLcom/sudantha2/youtube/ui/home/HomeViewModel;->**(**)**
+HSPLcom/sudantha2/youtube/ui/components/VideoCardKt;->**(**)**
+HSPLcom/sudantha2/youtube/ui/components/ShimmerKt;->**(**)**
+HSPLcom/sudantha2/youtube/data/repo/FeedRepository;->**(**)**
+HSPLcom/sudantha2/youtube/core/innertube/InnerTubeApi;->**(**)**
 
 # Composition / layout hot path
 HSPLandroidx/compose/runtime/**->**(**)**
@@ -30,7 +30,7 @@ Landroidx/compose/ui/node/LayoutNode;**
 Landroidx/compose/runtime/ComposerImpl;**
 
 # Player prepare path
-HSPLcom/yt4/app/player/PlayerFactory;->**(**)**
-HSPLcom/yt4/app/player/LowRamLoadControl;->**(**)**
+HSPLcom/sudantha2/youtube/player/PlayerFactory;->**(**)**
+HSPLcom/sudantha2/youtube/player/LowRamLoadControl;->**(**)**
 HSPLandroidx/media3/exoplayer/ExoPlayerImpl;->**(**)**
 HSPLandroidx/media3/exoplayer/ExoPlayerImplInternal;->**(**)**

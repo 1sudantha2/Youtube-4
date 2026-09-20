@@ -13,11 +13,11 @@
 
 # ── kotlinx.serialization ────────────────────────────────────────────────────
 -dontwarn kotlinx.serialization.**
--keep,includedescriptorclasses class com.yt4.app.**$$serializer { *; }
--keepclassmembers class com.yt4.app.** {
+-keep,includedescriptorclasses class com.sudantha2.youtube.**$$serializer { *; }
+-keepclassmembers class com.sudantha2.youtube.** {
     *** Companion;
 }
--keepclasseswithmembers class com.yt4.app.** {
+-keepclasseswithmembers class com.sudantha2.youtube.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 
@@ -34,7 +34,7 @@
 # Media3 ships consumer rules for its reflective bits (extensions, RenderersFactory
 # via DefaultRenderersFactory subclasses). We only need the service + session glue.
 -keep class androidx.media3.session.** { *; }
--keep class com.yt4.app.player.PlayerService { *; }
+-keep class com.sudantha2.youtube.player.PlayerService { *; }
 -dontwarn androidx.media3.**
 
 # ── NewPipeExtractor (+ Rhino, jsoup, nanojson) ──────────────────────────────

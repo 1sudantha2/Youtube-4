@@ -27,7 +27,7 @@ hardware.
 ## Architecture
 
 ```
-app/src/main/java/com/yt4/app/
+app/src/main/java/com/sudantha2/youtube/
 ├── YT4App.kt                     # bootstrap: DI wiring + Coil singleton
 ├── MainActivity.kt               # single-activity shell, player bind/unbind
 ├── core/

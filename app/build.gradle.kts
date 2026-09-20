@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.yt4.app"
+    namespace = "com.sudantha2.youtube"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.yt4.app"
+        applicationId = "com.sudantha2.youtube"
         minSdk = 26          // Media3 session + WebView auth flows work cleanly from 26.
         targetSdk = 35
         versionCode = 1
@@ -22,11 +22,21 @@ android {
         resourceConfigurations += setOf("en")
     }
 
+    // CI/local convenience signing: reuses the auto-generated debug keystore
+    // so produced APKs are installable. For Play distribution, point this at
+    // a real upload keystore supplied via gradle.properties / env secrets.
+    signingConfigs {
+        create("ci") {
+            initWith(getByName("debug"))
+        }
+    }
+
     buildTypes {
         release {
             // R8 full mode (enabled globally via android.enableR8.fullMode).
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("ci")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), // -optimize passes on
                 "proguard-rules.pro",
@@ -61,6 +71,16 @@ android {
                 "kotlin/**",
                 "DebugProbesKt.bin",
             )
+        }
+    }
+}
+
+// Deliverable APK naming: release → `You-tube.apk`, debug → `You-tube-debug.apk`.
+androidComponents {
+    onVariants { variant ->
+        val name = if (variant.buildType == "release") "You-tube.apk" else "You-tube-${variant.buildType}.apk"
+        variant.outputs.forEach { output ->
+            output.outputFileName.set(name)
         }
     }
 }
