@@ -1,3 +1,5 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -84,10 +86,10 @@ tasks.configureEach {
         doLast {
             val dir = layout.buildDirectory.dir("outputs/apk/release").get().asFile
             dir.listFiles { f -> f.name.endsWith(".apk") }?.firstOrNull()?.let { apk ->
-                java.nio.file.Files.move(
+                Files.move(
                     apk.toPath(),
                     dir.toPath().resolve("You-tube.apk"),
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.REPLACE_EXISTING,
                 )
             }
         }

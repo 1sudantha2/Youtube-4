@@ -35,8 +35,11 @@ jobs:
       - name: Publish failure details
         if: failure()
         run: |
+          ERRS=$(grep -m30 -E "^e: |> Task .*FAILED|error:" build.log || true)
           DETAILS=$(grep -B2 -A12 -m1 "FAILURE: Build failed" build.log || true)
           [ -z "$DETAILS" ] && DETAILS=$(tail -40 build.log || true)
+          [ -n "$ERRS" ] && DETAILS="$ERRS
+          $DETAILS"
           echo "$DETAILS"
           DETAILS="${DETAILS//'%'/'%25'}"
           DETAILS="${DETAILS//$'\n'/'%0A'}"
