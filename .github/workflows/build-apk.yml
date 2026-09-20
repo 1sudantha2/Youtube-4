@@ -30,19 +30,32 @@ jobs:
           set -o pipefail
           gradle :app:assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
 
-      # Writes the real error into the job summary so it's readable from
-      # the check-run API without needing the full log stream.
+      # Surfaces the real error as workflow annotations (readable via the
+      # check-run annotations API) and keeps the full log as an artifact.
       - name: Publish failure details
         if: failure()
         run: |
+          DETAILS=$(grep -B2 -A12 -m1 "FAILURE: Build failed" build.log || true)
+          [ -z "$DETAILS" ] && DETAILS=$(tail -40 build.log || true)
+          echo "$DETAILS"
+          DETAILS="${DETAILS//'%'/'%25'}"
+          DETAILS="${DETAILS//$'\n'/'%0A'}"
+          DETAILS="${DETAILS//$'\r'/'%0D'}"
+          echo "::error title=Gradle build failed::$DETAILS"
           {
             echo "## Gradle failure details"
             echo '```'
-            grep -n -B3 -A30 -m1 "FAILURE: Build failed" build.log || tail -100 build.log
+            echo "$DETAILS"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "--- first errors ---"
-          grep -m20 -E "^e: |error:|Execution failed" build.log || true
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          retention-days: 7
 
       - name: Upload APK artifact
         if: success()
