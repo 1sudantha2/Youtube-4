@@ -76,12 +76,20 @@ android {
     }
 }
 
-// Deliverable APK naming: release → `You-tube.apk`, debug → `You-tube-debug.apk`.
-androidComponents {
-    onVariants { variant ->
-        val name = if (variant.buildType == "release") "You-tube.apk" else "You-tube-${variant.buildType}.apk"
-        variant.outputs.forEach { output ->
-            output.outputFileName.set(name)
+// Deliverable APK naming: release output → exactly `You-tube.apk`.
+// Renaming post-packaging (instead of the variant-output API, whose
+// availability differs across AGP 8.x minors) keeps this stable.
+tasks.configureEach {
+    if (name == "packageRelease") {
+        doLast {
+            val dir = layout.buildDirectory.dir("outputs/apk/release").get().asFile
+            dir.listFiles { f -> f.name.endsWith(".apk") }?.firstOrNull()?.let { apk ->
+                java.nio.file.Files.move(
+                    apk.toPath(),
+                    dir.toPath().resolve("You-tube.apk"),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                )
+            }
         }
     }
 }
