@@ -11,6 +11,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
+import androidx.media3.session.MediaLibrarySession
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
@@ -40,13 +41,13 @@ import com.sudantha2.youtube.core.di.ServiceLocator
 @OptIn(UnstableApi::class)
 class PlayerService : MediaSessionService() {
 
-    private var mediaSession: MediaSession? = null
+    private var mediaSession: MediaLibrarySession? = null
 
     /**
      * Session callback handling the PLAY_SOURCES custom command. Custom
      * commands live on the session callback, not on MediaSessionService.
      */
-    private val sessionCallback = object : MediaSession.Callback {
+    private val sessionCallback = object : MediaLibrarySession.Callback {
 
         override fun onCustomCommand(
             session: MediaSession,
@@ -86,7 +87,7 @@ class PlayerService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
         val player = PlayerFactory.create(this, ServiceLocator.httpClient)
-        mediaSession = MediaSession.Builder(this, player, sessionCallback)
+        mediaSession = MediaLibrarySession.Builder(this, player, sessionCallback)
             .setSessionActivity(
                 PendingIntent.getActivity(
                     this,
