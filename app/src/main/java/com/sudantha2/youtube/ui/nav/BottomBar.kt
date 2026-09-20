@@ -3,8 +3,8 @@ package com.sudantha2.youtube.ui.nav
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Subscriptions
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material3.Icon
@@ -24,7 +24,7 @@ private data class Tab(val route: String, val label: String, val icon: ImageVect
 
 private val TABS = listOf(
     Tab(Routes.HOME, "Home", Icons.Outlined.Home),
-    Tab(Routes.SUBSCRIPTIONS, "Subs", Icons.AutoMirrored.Outlined.Subscriptions),
+    Tab(Routes.SUBSCRIPTIONS, "Subs", Icons.Outlined.Subscriptions),
     Tab(Routes.LIBRARY, "Library", Icons.Outlined.VideoLibrary),
     Tab(Routes.SIGN_IN, "Account", Icons.Outlined.AccountCircle),
 )
