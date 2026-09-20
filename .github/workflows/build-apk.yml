@@ -26,9 +26,26 @@ jobs:
           gradle-version: "8.9"
 
       - name: Build release APK (R8 full mode, CI-signed)
-        run: gradle :app:assembleRelease --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          gradle :app:assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
+
+      # Writes the real error into the job summary so it's readable from
+      # the check-run API without needing the full log stream.
+      - name: Publish failure details
+        if: failure()
+        run: |
+          {
+            echo "## Gradle failure details"
+            echo '```'
+            grep -n -B3 -A30 -m1 "FAILURE: Build failed" build.log || tail -100 build.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "--- first errors ---"
+          grep -m20 -E "^e: |error:|Execution failed" build.log || true
 
       - name: Upload APK artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: You-tube-apk

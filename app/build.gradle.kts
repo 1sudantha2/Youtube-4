@@ -26,8 +26,9 @@ android {
     // so produced APKs are installable. For Play distribution, point this at
     // a real upload keystore supplied via gradle.properties / env secrets.
     signingConfigs {
+        val debugKeystore = getByName("debug") // container scope — resolve here
         create("ci") {
-            initWith(getByName("debug"))
+            initWith(debugKeystore)
         }
     }
 
